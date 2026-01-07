@@ -1,11 +1,11 @@
-const CACHE_NAME = 'truthponderer-v1';
-const DYNAMIC_CACHE = 'truthponderer-dynamic-v1';
+const CACHE_NAME = 'truthponderer-v2';
+const DYNAMIC_CACHE = 'truthponderer-dynamic-v2';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
+  '/truthPonderer/',
+  '/truthPonderer/index.html',
+  '/truthPonderer/manifest.json',
   'https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/react@18/umd/react.production.min.js',
@@ -101,7 +101,8 @@ self.addEventListener('fetch', (event) => {
             
             // Return cached index.html for navigation requests when offline
             if (request.mode === 'navigate') {
-              return caches.match('./index.html');
+              return caches.match('/truthPonderer/index.html')
+                .then(r => r || caches.match('/truthPonderer/'));
             }
             
             return new Response('Offline - Content not available', {
@@ -163,6 +164,6 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
   event.waitUntil(
-    clients.openWindow('./')
+    clients.openWindow('/truthPonderer/')
   );
 });
