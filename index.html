@@ -18,6 +18,11 @@
   <link rel="apple-touch-icon" href="https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png">
   <link rel="manifest" href="./manifest.json">
   
+  <!-- Google Fonts - Cherry Swash -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cherry+Swash:wght@400;700&display=swap" rel="stylesheet">
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -25,6 +30,11 @@
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    }
+    
+    /* Cherry Swash for truthPonderer branding */
+    .cherry-swash {
+      font-family: 'Cherry Swash', cursive;
     }
     
     .splash-screen {
@@ -64,6 +74,7 @@
       font-size: 32px;
       font-weight: bold;
       margin-bottom: 10px;
+      font-family: 'Cherry Swash', cursive;
     }
     
     .splash-tagline {
@@ -99,11 +110,19 @@
       const [isInstalled, setIsInstalled] = useState(false);
 
       useEffect(() => {
-        // Hide splash screen
-        setTimeout(() => {
+        // Always hide splash screen after timeout, even if content isn't ready
+        const splashTimer = setTimeout(() => {
           const splash = document.getElementById('splash');
-          if (splash) splash.classList.add('hidden');
-        }, 1500);
+          if (splash) {
+            splash.classList.add('hidden');
+            // Remove from DOM after animation
+            setTimeout(() => {
+              if (splash && splash.parentNode) {
+                splash.parentNode.removeChild(splash);
+              }
+            }, 500);
+          }
+        }, 2000); // Max 2 seconds for splash
 
         // Check if already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -218,7 +237,7 @@
                   className: 'w-12 h-12 object-contain'
                 }),
                 e('div', {},
-                  e('h1', { className: 'text-2xl font-bold text-gray-800' }, 'truthPonderer'),
+                  e('h1', { className: 'text-2xl font-bold text-gray-800 cherry-swash' }, 'truthPonderer'),
                   e('p', { className: 'text-xs text-gray-600' }, 'Unlearning + Relearning = New Learning')
                 )
               ),
@@ -292,16 +311,16 @@
             e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
               e('div', { className: 'prose max-w-none space-y-4' },
                 e('p', { className: 'text-lg leading-relaxed' },
-                  'This ', e('span', { className: 'font-semibold italic' }, 'truthPonderer'),
+                  'This ', e('span', { className: 'font-semibold italic cherry-swash' }, 'truthPonderer'),
                   ' welcomes you with deep open-mindedness.'
                 ),
                 e('p', { className: 'text-lg leading-relaxed' },
                   'It is a pleasure to see ', e('span', { className: 'font-bold' }, 'you'), ' here.'
                 ),
                 e('p', { className: 'text-lg leading-relaxed' },
-                  'This ', e('span', { className: 'italic' }, 'truthPonderer (tP)'),
-                  ' wants to lighten up the ', e('span', { className: 'italic' }, 'truthPonderer'),
-                  ' in you and awaken many other ', e('span', { className: 'italic' }, 'truthPonderers'), '.'
+                  'This ', e('span', { className: 'italic cherry-swash' }, 'truthPonderer (tP)'),
+                  ' wants to lighten up the ', e('span', { className: 'italic cherry-swash' }, 'truthPonderer'),
+                  ' in you and awaken many other ', e('span', { className: 'italic cherry-swash' }, 'truthPonderers'), '.'
                 ),
                 
                 e('div', { className: 'bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg my-6' },
@@ -342,8 +361,8 @@
           // Videos Section
           activeSection === 'videos' && e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
             e('div', { className: 'flex items-center gap-3 mb-6' },
-              e('span', { className: 'text-4xl' }, '📺'),
-              e('h2', { className: 'text-3xl font-bold text-gray-800' }, 'truthPonderer Videos')
+              e('span', { className: 'text-2xl' }, '📺'),
+              e('h2', { className: 'text-3xl font-bold text-gray-800 cherry-swash' }, 'truthPonderer Videos')
             ),
             e('div', { className: 'mb-6' },
               e('a', {
@@ -368,10 +387,10 @@
           
           // About Section
           activeSection === 'about' && e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
-            e('h2', { className: 'text-3xl font-bold text-gray-800 mb-6' }, 'About truthPonderer'),
+            e('h2', { className: 'text-3xl font-bold text-gray-800 mb-6 cherry-swash' }, 'About truthPonderer'),
             e('div', { className: 'space-y-4 text-gray-700 leading-relaxed' },
               e('p', { className: 'text-lg' },
-                e('span', { className: 'font-semibold italic' }, 'truthPonderer (tP)'),
+                e('span', { className: 'font-semibold italic cherry-swash' }, 'truthPonderer (tP)'),
                 ' is a platform dedicated to exploring timeless wisdom and applying it to modern life.'
               ),
               e('p', {},
@@ -457,7 +476,7 @@
           e('div', { className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' },
             e('div', { className: 'grid md:grid-cols-3 gap-8' },
               e('div', {},
-                e('h3', { className: 'text-xl font-bold mb-4' }, 'truthPonderer'),
+                e('h3', { className: 'text-xl font-bold mb-4 cherry-swash' }, 'truthPonderer'),
                 e('p', { className: 'text-gray-300 text-sm' },
                   'Awakening the ponderer within. Journey with us through wisdom, spirituality, and self-discovery.'
                 )
