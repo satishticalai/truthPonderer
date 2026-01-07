@@ -1,7 +1,7 @@
-const CACHE_NAME = 'truthponderer-v2';
-const DYNAMIC_CACHE = 'truthponderer-dynamic-v2';
+const CACHE_NAME = 'truthponderer-v3';
+const DYNAMIC_CACHE = 'truthponderer-dynamic-v3';
 
-// Assets to cache on install
+// Assets to cache on install - Using full URLs for reliability
 const STATIC_ASSETS = [
   '/truthPonderer/',
   '/truthPonderer/index.html',
@@ -9,7 +9,8 @@ const STATIC_ASSETS = [
   'https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/react@18/umd/react.production.min.js',
-  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'
+  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=400&fit=crop'
 ];
 
 // Install event - cache static assets
