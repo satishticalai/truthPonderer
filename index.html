@@ -1,7 +1,425 @@
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#7c3aed">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="truthPonderer">
-<link rel="apple-touch-icon" href="https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>truthPonderer - Lifelong Learning</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="Unlearning + Relearning = New Learning. Discover ancient wisdom for modern living.">
+  <meta name="theme-color" content="#065f46">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="truthPonderer">
+  
+  <!-- Icons -->
+  <link rel="icon" type="image/png" href="https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png">
+  <link rel="apple-touch-icon" href="https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    }
+    
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+    
+    .splash-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .splash-logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .splash-text {
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .splash-tagline {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div id="splash" class="splash-screen">
+    <img src="https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png" alt="truthPonderer" class="splash-logo">
+    <div class="splash-text">truthPonderer</div>
+    <div class="splash-tagline">Loading wisdom...</div>
+  </div>
+
+  <div id="root"></div>
+
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <script>
+    const { useState, useEffect, createElement: e } = React;
+    const { render } = ReactDOM;
+    
+    function App() {
+      const [activeSection, setActiveSection] = useState('home');
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const [deferredPrompt, setDeferredPrompt] = useState(null);
+      const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+      const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+      useEffect(() => {
+        setTimeout(() => {
+          const splash = document.getElementById('splash');
+          if (splash) splash.classList.add('hidden');
+        }, 1500);
+
+        const handleBeforeInstallPrompt = (event) => {
+          event.preventDefault();
+          setDeferredPrompt(event);
+          setShowInstallPrompt(true);
+        };
+
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./service-worker.js')
+            .then(() => console.log('Service Worker registered'))
+            .catch(err => console.log('SW registration failed:', err));
+        }
+
+        return () => {
+          window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
+        };
+      }, []);
+
+      const handleInstallClick = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+          setShowInstallPrompt(false);
+        }
+        setDeferredPrompt(null);
+      };
+
+      const categories = [
+        { id: 'home', name: 'Home' },
+        { id: 'general', name: 'General' },
+        { id: 'family', name: 'Family' },
+        { id: 'spirituality', name: 'Spirituality' },
+        { id: 'evolve', name: 'Evolve' },
+        { id: 'technou', name: 'TechnoU' },
+        { id: 'videos', name: 'Videos' },
+        { id: 'about', name: 'About' },
+        { id: 'contact', name: 'Contact' }
+      ];
+
+      return e('div', { className: 'min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50' },
+        !isOnline && e('div', { className: 'bg-yellow-600 text-white py-2 px-4 text-center text-sm' },
+          '⚠️ You\'re offline. Some features may be limited.'
+        ),
+        
+        showInstallPrompt && e('div', { className: 'bg-green-800 text-white py-3 px-4 sticky top-0 z-50 shadow-lg' },
+          e('div', { className: 'max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap' },
+            e('div', { className: 'flex items-center gap-3' },
+              e('span', { className: 'text-sm font-medium' }, '📱 Install truthPonderer app for offline access!')
+            ),
+            e('div', { className: 'flex gap-2' },
+              e('button', {
+                onClick: handleInstallClick,
+                className: 'bg-white text-green-800 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-100'
+              }, 'Install'),
+              e('button', {
+                onClick: () => setShowInstallPrompt(false),
+                className: 'text-white hover:text-gray-200 text-xl'
+              }, '×')
+            )
+          )
+        ),
+
+        e('header', { className: 'bg-white shadow-md sticky top-0 z-40' },
+          e('div', { className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' },
+            e('div', { className: 'flex justify-between items-center py-4' },
+              e('div', { 
+                className: 'flex items-center gap-3 cursor-pointer',
+                onClick: () => setActiveSection('home')
+              },
+                e('img', {
+                  src: 'https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png',
+                  alt: 'truthPonderer Logo',
+                  className: 'w-12 h-12 object-contain'
+                }),
+                e('div', {},
+                  e('h1', { className: 'text-2xl font-bold text-gray-800' }, 'truthPonderer'),
+                  e('p', { className: 'text-xs text-gray-600' }, 'Unlearning + Relearning = New Learning')
+                )
+              ),
+              
+              e('nav', { className: 'hidden md:flex items-center gap-4' },
+                categories.slice(0, 7).map(cat =>
+                  e('button', {
+                    key: cat.id,
+                    onClick: () => setActiveSection(cat.id),
+                    className: `px-3 py-2 rounded-lg transition-colors ${
+                      activeSection === cat.id
+                        ? 'bg-green-700 text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`
+                  }, cat.name)
+                )
+              ),
+              
+              e('button', {
+                className: 'md:hidden p-2 rounded-lg hover:bg-gray-100',
+                onClick: () => setMobileMenuOpen(!mobileMenuOpen)
+              }, mobileMenuOpen ? '✕' : '☰')
+            ),
+            
+            mobileMenuOpen && e('nav', { className: 'md:hidden py-4 border-t' },
+              categories.map(cat =>
+                e('button', {
+                  key: cat.id,
+                  onClick: () => {
+                    setActiveSection(cat.id);
+                    setMobileMenuOpen(false);
+                  },
+                  className: `w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeSection === cat.id
+                      ? 'bg-green-700 text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }, cat.name)
+              )
+            )
+          )
+        ),
+
+        e('main', { className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' },
+          activeSection === 'home' && e('div', { className: 'space-y-8' },
+            e('div', { className: 'relative h-64 rounded-xl overflow-hidden shadow-xl' },
+              e('img', {
+                src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=400&fit=crop',
+                alt: 'Header',
+                className: 'w-full h-full object-cover'
+              }),
+              e('div', { className: 'absolute inset-0 bg-gradient-to-r from-green-900/80 to-emerald-900/80 flex items-center justify-center' },
+                e('div', { className: 'text-center text-white px-4' },
+                  e('h1', { className: 'text-5xl font-bold mb-4' }, 'सुस्वागतम् / Welcome'),
+                  e('p', { className: 'text-2xl' }, 'नमस्कारम् / Hello !!!')
+                )
+              )
+            ),
+            
+            e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
+              e('div', { className: 'prose max-w-none space-y-4' },
+                e('p', { className: 'text-lg leading-relaxed' },
+                  'This ', e('span', { className: 'font-semibold italic' }, 'truthPonderer'),
+                  ' welcomes you with deep open-mindedness.'
+                ),
+                e('p', { className: 'text-lg leading-relaxed' },
+                  'It is a pleasure to see ', e('span', { className: 'font-bold' }, 'you'), ' here.'
+                ),
+                e('p', { className: 'text-lg leading-relaxed' },
+                  'This ', e('span', { className: 'italic' }, 'truthPonderer (tP)'),
+                  ' wants to lighten up the ', e('span', { className: 'italic' }, 'truthPonderer'),
+                  ' in you and awaken many other ', e('span', { className: 'italic' }, 'truthPonderers'), '.'
+                ),
+                
+                e('div', { className: 'bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg my-6' },
+                  e('h3', { className: 'text-2xl font-bold text-gray-800 mb-4' }, 'Our Mission'),
+                  e('p', { className: 'text-gray-700 leading-relaxed' },
+                    'We are here to learn thoughts, teachings, messages and topics along with some ancient knowledge/wisdom treasures with an aim that it can be utilized in today\'s world too with, of course, a new twist and liberty of thinking.'
+                  )
+                ),
+                
+                e('p', { className: 'text-lg leading-relaxed' },
+                  'The main aim is to guide individuals to develop or help to make their own way of thinking and try to discover themselves as they lead their life and whatever comes in between, which is truly an evolutional process.'
+                ),
+                
+                e('div', { className: 'bg-yellow-50 border-l-4 border-yellow-500 p-6 my-6' },
+                  e('p', { className: 'text-lg italic text-gray-800' },
+                    'This is a small attempt to add a little bit of light to ',
+                    e('span', { className: 'font-semibold' }, 'तमसो मा ज्योतिर्गमय'),
+                    ' in today\'s world scenario.'
+                  )
+                ),
+                
+                e('blockquote', { className: 'border-l-4 border-green-700 pl-6 py-4 my-6 bg-gray-50' },
+                  e('p', { className: 'text-lg italic text-gray-700' },
+                    'Our very few but truly great rishis and sages (and other great thinkers) were all ',
+                    e('span', { className: 'font-semibold' }, 'ponderers'),
+                    ' who invented their own paths and showed us the way and open-endedly made us to invent or create ',
+                    e('span', { className: 'font-semibold' }, 'our own path'), '.'
+                  )
+                ),
+                
+                e('p', { className: 'text-xl font-semibold text-center text-green-700 my-8' },
+                  'Let\'s ponder and embark together to discover or rediscover…'
+                )
+              )
+            )
+          ),
+          
+          activeSection === 'videos' && e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
+            e('div', { className: 'flex items-center gap-3 mb-6' },
+              e('span', { className: 'text-4xl' }, '📺'),
+              e('h2', { className: 'text-3xl font-bold text-gray-800' }, 'truthPonderer Videos')
+            ),
+            e('div', { className: 'mb-6' },
+              e('a', {
+                href: 'https://www.youtube.com/@truthponderer',
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className: 'inline-flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700'
+              }, '▶️ Visit YouTube Channel')
+            ),
+            e('div', { className: 'aspect-video rounded-lg overflow-hidden shadow-md' },
+              e('iframe', {
+                width: '100%',
+                height: '100%',
+                src: 'https://www.youtube.com/embed/7PHg-6dkQO0',
+                title: 'truthPonderer Introduction',
+                frameBorder: '0',
+                allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                allowFullScreen: true
+              })
+            )
+          ),
+          
+          activeSection === 'about' && e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
+            e('h2', { className: 'text-3xl font-bold text-gray-800 mb-6' }, 'About truthPonderer'),
+            e('div', { className: 'space-y-4 text-gray-700 leading-relaxed' },
+              e('p', { className: 'text-lg' },
+                e('span', { className: 'font-semibold italic' }, 'truthPonderer (tP)'),
+                ' is a platform dedicated to exploring timeless wisdom and applying it to modern life.'
+              ),
+              e('div', { className: 'bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg mt-6' },
+                e('h3', { className: 'text-xl font-bold mb-3' }, 'Our Philosophy'),
+                e('p', { className: 'mb-2' },
+                  e('span', { className: 'font-semibold' }, 'Unlearning + Relearning = New Learning')
+                ),
+                e('p', {}, 'This equation represents our approach to lifelong learning and personal evolution.')
+              )
+            )
+          ),
+          
+          activeSection === 'contact' && e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
+            e('h2', { className: 'text-3xl font-bold text-gray-800 mb-6' }, 'Contact Us'),
+            e('div', { className: 'space-y-4' },
+              e('a', {
+                href: 'https://truthponderer.wordpress.com/',
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className: 'flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100'
+              },
+                e('span', { className: 'text-2xl' }, '🌐'),
+                e('div', {},
+                  e('div', { className: 'font-semibold text-gray-800' }, 'Main Website'),
+                  e('div', { className: 'text-sm text-gray-600' }, 'truthponderer.wordpress.com')
+                )
+              ),
+              e('a', {
+                href: 'https://twitter.com/truthPonderer',
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className: 'flex items-center gap-3 p-4 bg-sky-50 rounded-lg hover:bg-sky-100'
+              },
+                e('span', { className: 'text-2xl' }, '𝕏'),
+                e('div', {},
+                  e('div', { className: 'font-semibold text-gray-800' }, 'Twitter'),
+                  e('div', { className: 'text-sm text-gray-600' }, '@truthPonderer')
+                )
+              ),
+              e('a', {
+                href: 'https://www.youtube.com/@truthponderer',
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className: 'flex items-center gap-3 p-4 bg-red-50 rounded-lg hover:bg-red-100'
+              },
+                e('span', { className: 'text-2xl' }, '▶️'),
+                e('div', {},
+                  e('div', { className: 'font-semibold text-gray-800' }, 'YouTube Channel'),
+                  e('div', { className: 'text-sm text-gray-600' }, '@truthponderer')
+                )
+              )
+            )
+          ),
+          
+          (activeSection !== 'home' && activeSection !== 'videos' && activeSection !== 'about' && activeSection !== 'contact') &&
+            e('div', { className: 'bg-white rounded-xl shadow-lg p-8' },
+              e('h2', { className: 'text-3xl font-bold text-gray-800 mb-6 capitalize' }, activeSection),
+              e('p', { className: 'text-gray-700 text-lg mb-4' },
+                'Explore our collection of articles and insights about ', activeSection, '.'
+              ),
+              e('div', { className: 'bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg' },
+                e('p', { className: 'text-gray-600 mb-4' },
+                  'Content for the ', activeSection, ' section. Visit the main website to explore all articles.'
+                ),
+                e('a', {
+                  href: `https://truthponderer.wordpress.com/category/${activeSection}/`,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  className: 'inline-block text-green-700 hover:text-green-900 font-semibold'
+                }, 'View ', activeSection, ' articles →')
+              )
+            )
+        ),
+
+        e('footer', { className: 'bg-gray-800 text-white mt-16' },
+          e('div', { className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' },
+            e('div', { className: 'text-center' },
+              e('h3', { className: 'text-xl font-bold mb-4' }, 'truthPonderer'),
+              e('p', { className: 'text-gray-300 text-sm mb-4' },
+                'Awakening the ponderer within. Journey with us through wisdom, spirituality, and self-discovery.'
+              ),
+              e('div', { className: 'border-t border-gray-700 mt-6 pt-6 text-gray-400 text-sm' },
+                e('p', {}, '© 2025 truthPonderer. All rights reserved. | तमसो मा ज्योतिर्गमय')
+              )
+            )
+          )
+        )
+      );
+    }
+
+    render(e(App), document.getElementById('root'));
+  </script>
+</body>
+</html>
