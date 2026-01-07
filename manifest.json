@@ -1,20 +1,52 @@
-const CACHE_NAME = 'truthponderer-v1';
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        '/',
-        '/index.html',
-      ]);
-    })
-  );
-});
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
-});
+{
+  "name": "truthPonderer - Lifelong Learning",
+  "short_name": "truthPonderer",
+  "description": "Unlearning + Relearning = New Learning. Discover ancient wisdom for modern living.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#065f46",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Go to home page",
+      "url": "/",
+      "icons": [{ "src": "https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Videos",
+      "short_name": "Videos",
+      "description": "Watch truthPonderer videos",
+      "url": "/?section=videos",
+      "icons": [{ "src": "https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=540&h=720&fit=crop",
+      "sizes": "540x720",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
+  ]
+}
