@@ -3,9 +3,9 @@ const DYNAMIC_CACHE = 'truthponderer-dynamic-v1';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  './',
+  './index.html',
+  './manifest.json',
   'https://truthponderer.wordpress.com/wp-content/uploads/2018/08/tplogog.png',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/react@18/umd/react.production.min.js',
@@ -51,48 +51,25 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Handle API requests differently
-  if (request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Clone and cache successful responses
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Return cached version if available
-          return caches.match(request);
-        })
-    );
+  // Skip external domains except for our allowed CDNs
+  const url = new URL(request.url);
+  const allowedDomains = [
+    'truthponderer.wordpress.com',
+    'cdn.tailwindcss.com',
+    'unpkg.com',
+    'images.unsplash.com',
+    'www.youtube.com',
+    'i.ytimg.com'
+  ];
+  
+  const isAllowedDomain = allowedDomains.some(domain => url.hostname.includes(domain));
+  const isSameOrigin = url.origin === location.origin;
+  
+  if (!isSameOrigin && !isAllowedDomain) {
     return;
   }
 
-  // Network-first strategy for HTML
-  if (request.headers.get('accept').includes('text/html')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request)
-            .then((response) => response || caches.match('/index.html'));
-        })
-    );
-    return;
-  }
-
-  // Cache-first strategy for other resources
+  // Cache-first strategy for static assets
   event.respondWith(
     caches.match(request)
       .then((response) => {
@@ -121,7 +98,12 @@ self.addEventListener('fetch', (event) => {
           })
           .catch((error) => {
             console.log('[Service Worker] Fetch failed:', error);
-            // You could return a custom offline page here
+            
+            // Return cached index.html for navigation requests when offline
+            if (request.mode === 'navigate') {
+              return caches.match('./index.html');
+            }
+            
             return new Response('Offline - Content not available', {
               status: 503,
               statusText: 'Service Unavailable',
@@ -152,7 +134,6 @@ self.addEventListener('sync', (event) => {
   console.log('[Service Worker] Background sync:', event.tag);
   if (event.tag === 'sync-data') {
     event.waitUntil(
-      // Perform background sync operations here
       Promise.resolve()
     );
   }
@@ -182,6 +163,6 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
   event.waitUntil(
-    clients.openWindow('/')
+    clients.openWindow('./')
   );
 });
